@@ -33,10 +33,11 @@ public class RunOptimizer {
 	static String FilePath = "C:/Users/mingni/Desktop/SDD_HL/DATA/";
 	//static String table_SDDDemand = "SDD_STYL_DEMAND.csv";
 	static String table_SDDDemand = "SDD_STYL_DEMAND_SAMPLE_V1_ADDGeoHash_NOV29.csv";
-	static String table_StrList = "STRS_LIST.csv";
+
 	
 	//table distance from zip to store 
 	//on the database 
+	static String table_StrList = "DB2ADMIN.STRS_LIST";
 	static String table_DistanceStrZip = "DB2ADMIN.ZIP_NODE_MAPPING_CHI_GH4";
 	
 	static HashMap<Integer, Integer> stylIndex = new HashMap<Integer, Integer>();
@@ -51,12 +52,12 @@ public class RunOptimizer {
 	static HashMap<String, Integer> dayIndex = new HashMap<String, Integer>();
 	static HashMap<Integer, String> indexDay = new HashMap<Integer, String>();
 	
-	public RunOptimizer(Connection con, Integer NLines, Integer NStores) throws Exception{
-		this.DataInputOptimizer(con, NLines, NStores);
+	public RunOptimizer(Connection con,Integer NLines,int nfleet,HashSet<Integer> selectedStr) throws Exception{
+		this.DataInputOptimizer(con, NLines, nfleet, selectedStr);
 		plan.cplexRun();
 	}
 	
-	public void DataInputOptimizer(Connection con, Integer NLines, Integer NStores) throws Exception{
+	public void DataInputOptimizer(Connection con,Integer NLines,int nfleet,HashSet<Integer> selectedStr) throws Exception{
 		//Pseudo data input
 		double rate_md = 0.3;
 		double rate_sl = 0.5;
@@ -74,7 +75,7 @@ public class RunOptimizer {
 		plan.b = 0;
 		
 		//get the index maps ready to use 
-		this.setIndex(NLines, NStores);
+		this.setIndex(NLines, selectedStr);
 		
 		plan.p_style = stylIndex.size();
 		plan.p_day = dayIndex.size();
@@ -163,8 +164,41 @@ public class RunOptimizer {
 		System.out.println("Parameter loading finish. Optimizer run.");
 	}
 	
+	public void storeInfo(HashSet<Integer> selectedStr) throws Exception{
+		//set index for selected stores
+		//Read the sdd demand table
+        BufferedReader reader = new BufferedReader(new FileReader(FilePath + table_SDDDemand));
+        reader = new BufferedReader(new FileReader(FilePath + table_StrList));
+        reader.readLine(); //skip the header 
+        line = null;
+        int ns=0;
+        if (NStores!=0){
+            while(ns<NStores & (line=reader.readLine())!=null){ 
+                String item[] = line.split(",");
+                //col2:StrID
+                StrSet.add(Integer.parseInt(item[1]));
+                ns++;
+            }
+        }else{
+            while((line=reader.readLine())!=null){ 
+                String item[] = line.split(",");
+                //col2:StrID
+                StrSet.add(Integer.parseInt(item[1]));
+            }
+        }
+
+        
+        //set store index
+        ind=0;
+        for(int StrId:StrSet){
+        	storeIndex.put(StrId, new Integer(ind));
+        	indexStore.put(new Integer(ind), StrId);
+        	ind++;
+        }
+	}
+	
 	//prepare for the index
-	public void setIndex(Integer NLines, Integer NStores) throws Exception{
+	public void setIndex(Integer NLines,HashSet<Integer> selectedStr) throws Exception{
 	//public void setIndex() throws Exception{
 		//Read the sdd demand table
         BufferedReader reader = new BufferedReader(new FileReader(FilePath + table_SDDDemand));
@@ -231,33 +265,7 @@ public class RunOptimizer {
         	ind++;
         }    
         
-        reader = new BufferedReader(new FileReader(FilePath + table_StrList));
-        reader.readLine(); //skip the header 
-        line = null;
-        int ns=0;
-        if (NStores!=0){
-            while(ns<NStores & (line=reader.readLine())!=null){ 
-                String item[] = line.split(",");
-                //col2:StrID
-                StrSet.add(Integer.parseInt(item[1]));
-                ns++;
-            }
-        }else{
-            while((line=reader.readLine())!=null){ 
-                String item[] = line.split(",");
-                //col2:StrID
-                StrSet.add(Integer.parseInt(item[1]));
-            }
-        }
 
-        
-        //set store index
-        ind=0;
-        for(int StrId:StrSet){
-        	storeIndex.put(StrId, new Integer(ind));
-        	indexStore.put(new Integer(ind), StrId);
-        	ind++;
-        }
 	}
 	
 	//get store SDD setup cost

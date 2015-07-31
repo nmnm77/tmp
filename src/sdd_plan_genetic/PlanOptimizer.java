@@ -20,7 +20,6 @@ public class PlanOptimizer {
 	//double out_carrier_cost = 0.0;
 	//double out_markdown = 0.0;
 	//double out_salelost = 0.0;
-	
 	//double out_nfleet = 0.0;
 	
 	/*********************************************
@@ -348,7 +347,7 @@ public class PlanOptimizer {
 				for(int j=0;j<p_style;j++){
 					for(int k=0;k<p_str;k++){
 						for(int z=0;z<p_zone;z++){
-							V_str_next[j][k] += cplex.getValue(nitem[j][k][z]);
+							V_str_next[j][k] += (int)Math.round(cplex.getValue(nitem[j][k][z]));
 						}
 					}
 				}
