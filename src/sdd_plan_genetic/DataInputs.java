@@ -2,8 +2,12 @@ package sdd_plan_genetic;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 /**
  * 
  * @author mingni
@@ -15,6 +19,66 @@ public class DataInputs {
 	static String FilePath = "C:/Users/mingni/Desktop/SDD_HL/DATA/"; 
 	static String table_StyleInfo = "STYL_INFO.csv";
 	static String table_ZipAland = "GH4_Gaz_zcta_national.csv";
+	//on the database 
+	static String table_StrList = "DB2ADMIN.STRS_LIST";
+	
+	
+    
+    public HashSet<Integer> getStrSet (Connection con,HashSet<Integer> selectedStr) throws Exception{
+    	HashSet<Integer> StrSet = new HashSet<Integer>();
+    	String storeIndex = createStringList(selectedStr);
+    	
+		Statement stmt = con.createStatement();
+		String query = "SELECT DISTANCE_BING FROM "+ table_StrList
+				+" WHERE ZIP_GH4 ='"+ zip +"' AND STR_ID = "+str;		
+		System.out.println(query);
+		ResultSet rs = stmt.executeQuery(query);
+		if(rs.next() && rs.getString(1) != null){
+			distance = Double.valueOf(rs.getString(1)).doubleValue();
+		}
+		rs.close();
+		stmt.close();
+		return selectedStr;
+    }
+    
+    /**
+     * Create the (STRING) keyset from the map
+     * @param map The Input HashMap<Integer,Integer>
+     * @return (STRING) keyset
+     */
+	public static String createStringList(HashMap<Integer,Integer> map){
+		String strList = "(";
+		for(Integer key : map.keySet())
+			strList += key.toString() + ",";
+		return strList.substring(0, strList.length()-1) + ")";
+	}
+	
+	//method overloading
+	/**
+	 * Create the (STRING) list from the List
+	 * @param list The Input ArrayList
+	 * @return String list
+	 */
+	public static String createStringList(ArrayList<Integer> list){
+		String strList = "(";
+		for(Integer key : list)
+			strList += key.toString() + ",";
+		return strList.substring(0, strList.length()-1) + ")";
+	}
+	
+	//method overloading
+	/**
+	 * Create the (STRING) list from the List
+	 * @param list The Input HashSet
+	 * @return String list
+	 */
+	public static String createStringList(HashSet<Integer> list){
+		String strList = "(";
+		for(Integer key : list)
+			strList += key.toString() + ",";
+		return strList.substring(0, strList.length()-1) + ")";
+	}
+	
 	
 	//Price, markdown and salelost 
 	//SKUInfo

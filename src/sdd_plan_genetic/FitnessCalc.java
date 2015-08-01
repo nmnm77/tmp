@@ -1,5 +1,9 @@
 package sdd_plan_genetic;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /*
@@ -7,6 +11,8 @@ import java.util.HashSet;
  * fitness = seasonal profit
  */
 public class FitnessCalc {
+	
+
 
     // Calculate inidividuals fittness by comparing it to our candidate solution
     static int getFitness(Individual individual) {
@@ -29,6 +35,9 @@ public class FitnessCalc {
         
         return fitness;
     }
+
+	
+    
     
     // Get optimum fitness
     static int getMaxFitness() {

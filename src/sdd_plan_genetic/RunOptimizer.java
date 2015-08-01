@@ -1,6 +1,6 @@
 package sdd_plan_genetic;
 
-import java.io.BufferedReader;
+import java.io.BufferedReader; 
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -167,12 +167,25 @@ public class RunOptimizer {
 	public void storeInfo(HashSet<Integer> selectedStr) throws Exception{
 		//set index for selected stores
 		//Read the sdd demand table
-        BufferedReader reader = new BufferedReader(new FileReader(FilePath + table_SDDDemand));
-        reader = new BufferedReader(new FileReader(FilePath + table_StrList));
-        reader.readLine(); //skip the header 
-        line = null;
-        int ns=0;
-        if (NStores!=0){
+		
+        //set store index
+        int ind=0;
+        for(int StrId:selectedStr){
+        	storeIndex.put(StrId, new Integer(ind));
+        	indexStore.put(new Integer(ind), StrId);
+        	ind++;
+        }
+		
+		Statement stmt = con.createStatement();
+		String query = "SELECT DISTANCE_BING FROM "+ table_StrList
+				+" WHERE ZIP_GH4 ='"+ zip +"' AND STR_ID = "+str;		
+		System.out.println(query);
+		ResultSet rs = stmt.executeQuery(query);
+		if(rs.next() && rs.getString(1) != null){
+			distance = Double.valueOf(rs.getString(1)).doubleValue();
+		}
+		rs.close();
+		stmt.close();
             while(ns<NStores & (line=reader.readLine())!=null){ 
                 String item[] = line.split(",");
                 //col2:StrID
